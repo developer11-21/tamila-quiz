@@ -215,6 +215,14 @@ function showResult() {
   showScreen("result");
 }
 
+function getTrafficSource() {
+  const params = new URLSearchParams(window.location.search);
+  const source = params.get("utm_source") || params.get("src") || "";
+  const medium = params.get("utm_medium") || "";
+  const campaign = params.get("utm_campaign") || "";
+  return { source, medium, campaign };
+}
+
 function buildTelegramText(leadData) {
   const lines = [
     "Новая заявка из квиза: " + config.projectTitle,
@@ -223,6 +231,9 @@ function buildTelegramText(leadData) {
     "Telegram: " + (leadData.contact || "—"),
     "Результат: " + leadData.resultTitle,
     "Комментарий: " + (leadData.comment || "—"),
+    "Откуда пришла: " + (leadData.trafficSource.source || "прямая ссылка / не указано") +
+      (leadData.trafficSource.medium ? " / " + leadData.trafficSource.medium : "") +
+      (leadData.trafficSource.campaign ? " / " + leadData.trafficSource.campaign : ""),
     "",
     "Ответы:"
   ];
@@ -266,6 +277,7 @@ async function handleLeadSubmit(event) {
     contact: elements.leadContact.value.trim(),
     comment: elements.leadComment.value.trim(),
     answers: state.selectedAnswers,
+    trafficSource: getTrafficSource(),
     createdAt: new Date().toISOString()
   };
 
